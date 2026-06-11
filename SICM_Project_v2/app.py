@@ -279,7 +279,7 @@ with tab4:
     st.markdown("---")
     st.subheader("💰 Regla de Oro")
     
-    s_gold = ss['α']  # α = elasticidad capital
+    s_gold = solow_model.params['α']  # α = elasticidad capital
     st.latex(r"s_{oro} = \alpha = " + f"{ss['α']}")
     st.info(f"La tasa de ahorro que maximiza el consumo en estado estacionario es {s_gold:.3f}. "
             f"Tasa actual: {solow_model.params['s']:.3f}")
