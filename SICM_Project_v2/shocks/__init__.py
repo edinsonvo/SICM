@@ -1,3 +1,4 @@
-"""Módulo SICM - Simulador de Choques Macroeconómicos"""
+# shocks/__init__.py
+from .engine import ShockEngine
 
-__version__ = "1.0.0"
+__all__ = ['ShockEngine']
