@@ -348,6 +348,6 @@ if apply_shock:
 # Footer
 st.markdown("---")
 st.markdown("""
-**SICM v1.0 - Simulador Integral de Choques Macroeconómicos**  
+**SICM v2.0 - Simulador Integral de Choques Macroeconómicos**  
 *Desarrollado con Python, Streamlit, Plotly, Statsmodels y economía computacional*
 """)
