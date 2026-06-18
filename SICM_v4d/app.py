@@ -26,6 +26,18 @@ from reportlab.lib.units import inch
 import warnings
 warnings.filterwarnings('ignore')
 
+import plotly.io as pio
+
+# Configuración segura de Plotly
+pio.templates.default = "plotly_white"
+pio.renderers.default = 'browser'
+
+# Desactivar animaciones automáticas de Plotly
+pio.templates['plotly_white'].layout.updatemenus = []
+pio.templates['plotly_white'].layout.sliders = []
+
+# Configuración adicional para Streamlit
+st.set_option('deprecation.showPyplotGlobalUse', False)
 # ============================================================================
 # CONFIGURACIÓN DE PÁGINA
 # ============================================================================
