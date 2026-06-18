@@ -1,0 +1,1 @@
+SICM v3 Pro: versión ampliada con panel de indicadores, modelos y análisis de choques.
