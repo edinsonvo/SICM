@@ -26,18 +26,7 @@ from reportlab.lib.units import inch
 import warnings
 warnings.filterwarnings('ignore')
 
-import plotly.io as pio
 
-# Configuración segura de Plotly
-pio.templates.default = "plotly_white"
-pio.renderers.default = 'browser'
-
-# Desactivar animaciones automáticas de Plotly
-pio.templates['plotly_white'].layout.updatemenus = []
-pio.templates['plotly_white'].layout.sliders = []
-
-# Configuración adicional para Streamlit
-st.set_option('deprecation.showPyplotGlobalUse', False)
 # ============================================================================
 # CONFIGURACIÓN DE PÁGINA
 # ============================================================================
@@ -455,150 +444,153 @@ class DataManager:
 # ============================================================================
 
 class Visualizer:
-    """Visualizaciones interactivas y animaciones"""
+    """Visualizaciones interactivas y animaciones - VERSIÓN CORREGIDA"""
     
     @staticmethod
-    def plot_is_lm_animated(model, shock_type=None, magnitude=0.1, frames=20):
-        """Crear animación de transición IS-LM"""
-        # Obtener estado inicial
+    def plot_is_lm_static(model, shock_type=None, magnitude=0.1):
+        """Versión estática sin animaciones (evita errores DOM)"""
         initial_eq = model.solve()
         
-        # Generar frames de transición
-        fig = go.Figure()
-        
-        # Curvas base
+        # Generar curvas
         Y_range = np.linspace(40, 200, 100)
+        
+        # Curva IS
         Y_is, r_is = model.get_is_curve(Y_range)
         Y_lm, r_lm = model.get_lm_curve(Y_range)
         
-        # Añadir curvas estáticas
-        fig.add_trace(go.Scatter(x=Y_is, y=r_is, mode='lines', name='IS',
-                                line=dict(color='blue', width=2)))
-        fig.add_trace(go.Scatter(x=Y_lm, y=r_lm, mode='lines', name='LM',
-                                line=dict(color='red', width=2)))
+        fig = go.Figure()
         
-        # Punto inicial
-        fig.add_trace(go.Scatter(x=[initial_eq['Y']], y=[initial_eq['r']],
-                                mode='markers', name='Equilibrio Inicial',
-                                marker=dict(size=12, color='green', symbol='star')))
+        # Curvas estáticas
+        fig.add_trace(go.Scatter(
+            x=Y_is, y=r_is, 
+            mode='lines', 
+            name='IS',
+            line=dict(color='blue', width=3)
+        ))
         
-        # Frames para animación
+        fig.add_trace(go.Scatter(
+            x=Y_lm, y=r_lm, 
+            mode='lines', 
+            name='LM',
+            line=dict(color='red', width=3)
+        ))
+        
+        # Equilibrio inicial
+        fig.add_trace(go.Scatter(
+            x=[initial_eq['Y']], 
+            y=[initial_eq['r']],
+            mode='markers', 
+            name=f'Equilibrio: Y={initial_eq["Y"]:.1f}, r={initial_eq["r"]:.2%}',
+            marker=dict(size=15, color='green', symbol='star', line=dict(width=2, color='darkgreen'))
+        ))
+        
+        # Si hay choque, mostrar nuevo equilibrio
         if shock_type:
-            frames = []
-            for i in range(frames):
-                progress = i / frames
-                temp_model = ISLMModel(model.params.copy())
-                
-                if shock_type == 'Gasto Gobierno ↑':
-                    temp_model.params['G'] = model.params['G'] * (1 + magnitude * progress)
-                elif shock_type == 'Oferta Monetaria ↑':
-                    temp_model.params['M'] = model.params['M'] * (1 + magnitude * progress)
-                
-                eq = temp_model.solve()
-                
-                frame = go.Frame(data=[
-                    go.Scatter(x=[eq['Y']], y=[eq['r']], mode='markers',
-                              marker=dict(size=12, color='orange', symbol='star'))
-                ], name=f'frame{i}')
-                frames.append(frame)
+            temp_model = ISLMModel(model.params.copy())
+            temp_model.apply_shock(shock_type, magnitude)
+            new_eq = temp_model.solve()
             
-            fig.frames = frames
+            # Mostrar flecha de transición
+            fig.add_trace(go.Scatter(
+                x=[new_eq['Y']], 
+                y=[new_eq['r']],
+                mode='markers', 
+                name=f'Nuevo Equilibrio: Y={new_eq["Y"]:.1f}, r={new_eq["r"]:.2%}',
+                marker=dict(size=15, color='orange', symbol='star', line=dict(width=2, color='darkorange'))
+            ))
+            
+            # Línea de transición
+            fig.add_trace(go.Scatter(
+                x=[initial_eq['Y'], new_eq['Y']],
+                y=[initial_eq['r'], new_eq['r']],
+                mode='lines',
+                name='Transición',
+                line=dict(color='gray', width=2, dash='dot')
+            ))
         
         fig.update_layout(
-            title="Modelo IS-LM - Transición Dinámica",
+            title="Modelo IS-LM - Equilibrio Macroeconómico",
             xaxis_title="Producción (Y)",
             yaxis_title="Tasa de Interés (r)",
             template="plotly_white",
             height=500,
-            updatemenus=[dict(
-                type="buttons",
-                buttons=[dict(label="▶ Ejecutar", method="animate", args=[None, {"frame": {"duration": 100, "redraw": True}, "fromcurrent": True}])]
-            )]
+            hovermode='closest',
+            legend=dict(
+                yanchor="top",
+                y=0.99,
+                xanchor="left",
+                x=0.01
+            ),
+            # Desactivar modo de animación para evitar errores DOM
+            updatemenus=[]
         )
         
         return fig
     
     @staticmethod
-    def plot_macro_dashboard(data):
-        """Dashboard macroeconómico completo"""
-        fig = make_subplots(
-            rows=3, cols=2,
-            subplot_titles=('PIB', 'Inflación', 'Tasa de Interés', 
-                          'Desempleo', 'Tipo de Cambio', 'Correlaciones'),
-            specs=[[{'secondary_y': False}, {'secondary_y': False}],
-                   [{'secondary_y': False}, {'secondary_y': False}],
-                   [{'colspan': 2}, None]]
-        )
+    def plot_is_lm_slider(model):
+        """Versión con slider interactivo (más seguro que animación)"""
+        initial_eq = model.solve()
         
-        # PIB
-        fig.add_trace(go.Scatter(x=data['fecha'], y=data['PIB'], 
-                                mode='lines', name='PIB',
-                                line=dict(color='#1f77b4', width=2)), row=1, col=1)
+        # Generar curvas
+        Y_range = np.linspace(40, 200, 100)
+        Y_is, r_is = model.get_is_curve(Y_range)
+        Y_lm, r_lm = model.get_lm_curve(Y_range)
         
-        # Inflación
-        fig.add_trace(go.Scatter(x=data['fecha'], y=data['Inflacion']*100,
-                                mode='lines', name='Inflación (%)',
-                                line=dict(color='#ff7f0e', width=2)), row=1, col=2)
-        
-        # Tasa de Interés
-        fig.add_trace(go.Scatter(x=data['fecha'], y=data['Tasa_Interes']*100,
-                                mode='lines', name='Tasa (%)',
-                                line=dict(color='#2ca02c', width=2)), row=2, col=1)
-        
-        # Desempleo
-        fig.add_trace(go.Scatter(x=data['fecha'], y=data['Desempleo']*100,
-                                mode='lines', name='Desempleo (%)',
-                                line=dict(color='#d62728', width=2)), row=2, col=2)
-        
-        # Tipo de Cambio
-        fig.add_trace(go.Scatter(x=data['fecha'], y=data['Tipo_Cambio'],
-                                mode='lines', name='Tipo Cambio',
-                                line=dict(color='#9467bd', width=2)), row=3, col=1)
-        
-        fig.update_layout(
-            height=800,
-            template='plotly_white',
-            showlegend=True
-        )
-        
-        return fig
-    
-    @staticmethod
-    def plot_ad_as_animated(model, frames=20):
-        """Animación AD-AS con desplazamientos"""
         fig = go.Figure()
         
-        # Datos base
-        P_range = np.linspace(0.3, 2.0, 100)
-        Y_ad, P_ad = model.get_ad_curve(P_range)
-        Y_sras, P_sras = model.get_sras_curve(np.linspace(50, 150, 100))
+        # Curvas base
+        fig.add_trace(go.Scatter(
+            x=Y_is, y=r_is, mode='lines', name='IS',
+            line=dict(color='blue', width=3)
+        ))
         
-        # Curvas estáticas
-        fig.add_trace(go.Scatter(x=Y_ad, y=P_ad, mode='lines', name='AD',
-                                line=dict(color='blue', width=2)))
-        fig.add_trace(go.Scatter(x=Y_sras, y=P_sras, mode='lines', name='SRAS',
-                                line=dict(color='red', width=2)))
+        fig.add_trace(go.Scatter(
+            x=Y_lm, y=r_lm, mode='lines', name='LM',
+            line=dict(color='red', width=3)
+        ))
         
-        # LRAS
-        fig.add_vline(x=model.params['Y_n'], line_dash="dash", line_color="green",
-                     annotation_text="LRAS")
+        # Puntos de equilibrio para diferentes escenarios
+        scenarios = []
+        for g_mult in [0.8, 0.9, 1.0, 1.1, 1.2]:
+            temp_model = ISLMModel(model.params.copy())
+            temp_model.params['G'] = initial_eq['G'] * g_mult
+            eq = temp_model.solve()
+            scenarios.append({
+                'label': f'G={g_mult:.1f}x',
+                'Y': eq['Y'],
+                'r': eq['r']
+            })
         
-        # Equilibrio inicial
-        eq = model.solve()
-        fig.add_trace(go.Scatter(x=[eq['Y']], y=[eq['P']], mode='markers',
-                                marker=dict(size=12, color='green', symbol='star'),
-                                name='Equilibrio'))
+        # Añadir puntos de escenarios
+        for s in scenarios:
+            fig.add_trace(go.Scatter(
+                x=[s['Y']], y=[s['r']],
+                mode='markers',
+                name=s['label'],
+                marker=dict(size=10)
+            ))
+        
+        # Línea de equilibrio
+        Y_eqs = [s['Y'] for s in scenarios]
+        r_eqs = [s['r'] for s in scenarios]
+        fig.add_trace(go.Scatter(
+            x=Y_eqs, y=r_eqs,
+            mode='lines',
+            name='Sendero de Equilibrio',
+            line=dict(color='purple', width=2, dash='dash')
+        ))
         
         fig.update_layout(
-            title="Modelo AD-AS - Equilibrio Macroeconómico",
+            title="Modelo IS-LM - Análisis de Sensibilidad",
             xaxis_title="Producción (Y)",
-            yaxis_title="Nivel de Precios (P)",
+            yaxis_title="Tasa de Interés (r)",
             template="plotly_white",
-            height=500
+            height=500,
+            hovermode='closest'
         )
         
         return fig
-
 
 # ============================================================================
 # MÓDULO 4: SIMULACIÓN DE POLÍTICAS Y ESCENARIOS
