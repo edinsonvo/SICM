@@ -1,0 +1,6 @@
+fecha,PIB,Inflacion,Tasa_Interes,Desempleo,Tipo_Cambio
+2000-01-01,100.5,2.1,4.5,5.2,1.000
+2000-02-01,101.2,2.2,4.6,5.1,0.995
+2000-03-01,101.8,2.3,4.7,5.0,0.990
+2000-04-01,102.5,2.4,4.8,4.9,0.985
+... (más datos generados por la aplicación)
