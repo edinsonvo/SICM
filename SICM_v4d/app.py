@@ -1136,7 +1136,7 @@ def main():
             st.metric("Herramientas", "8", delta="Investigación")
 
         st.markdown("---")
-        st.subheader("🚀 Guía Rápida y Novedades v3.0")
+        st.subheader("🚀 Guía Rápida y Novedades v4.1")
 
         col1, col2 = st.columns(2)
         with col1:
