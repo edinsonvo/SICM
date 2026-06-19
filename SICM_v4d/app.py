@@ -1,8 +1,8 @@
 """
-SICM v3.0 - Simulador Integral de Choques Macroeconómicos
+SICM v4.1 - Simulador Integral de Choques Macroeconómicos
 Versión Universitaria y de Investigación (Corregida y Mejorada)
 
-Cambios principales v3.0:
+Cambios principales v4.1:
 - Mundell-Fleming: sistemas separados para tipo de cambio fijo (M endógena) y flexible (e endógena).
 - AD-AS: curva AD derivada rigurosamente del equilibrio IS-LM para cada nivel de precios P.
 - IS-LM: unificación de escalas (tasas en decimales) y validación numérica post-fsolve.
@@ -65,7 +65,7 @@ except ImportError:
 # ============================================================================
 
 st.set_page_config(
-    page_title="SICM v3.0 - Laboratorio Macroeconómico",
+    page_title="SICM v4.1 - Laboratorio Macroeconómico",
     page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -1097,7 +1097,7 @@ def import_scenarios_from_json(json_str):
 # ============================================================================
 
 def main():
-    st.markdown('<div class="main-header">📊 SICM v3.0</div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header">📊 SICM v4.1</div>', unsafe_allow_html=True)
     st.markdown('<div class="sub-header">Simulador Integral de Choques Macroeconómicos<br>'
                 'Versión Universitaria y de Investigación</div>', unsafe_allow_html=True)
 
@@ -1118,7 +1118,7 @@ def main():
         ]
         selection = st.radio("", nav_options, label_visibility="collapsed")
         st.markdown("---")
-        st.info("📚 SICM v3.0 - Modelos con validación numérica y derivación rigurosa")
+        st.info("📚 SICM v4.1 - Modelos con validación numérica y derivación rigurosa")
 
     # ========================================================================
     # PÁGINA: INICIO
@@ -1569,7 +1569,7 @@ def main():
 
         with col1:
             st.subheader("Configuración")
-            report_title = st.text_input("Título", "Análisis Macroeconómico SICM v3.0")
+            report_title = st.text_input("Título", "Análisis Macroeconómico SICM v4.1")
             include_model = st.checkbox("Incluir gráfico IS-LM", value=True)
             include_adas = st.checkbox("Incluir gráfico AD-AS", value=True)
 
@@ -1577,7 +1577,7 @@ def main():
                 content = []
                 content.append({
                     'title': 'Resumen Ejecutivo',
-                    'text': 'Análisis realizado con SICM v3.0. Los modelos incluyen validación numérica '
+                    'text': 'Análisis realizado con SICM v4.1. Los modelos incluyen validación numérica '
                            'y derivación rigurosa de ecuaciones. Los equilibrios han sido verificados '
                            'con tolerancia < 1e-6.'
                 })
