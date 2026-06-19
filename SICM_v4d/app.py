@@ -1,5 +1,5 @@
 """
-SICM v2.0 - Simulador Integral de Choques Macroeconómicos
+SICM v4.0 - Simulador Integral de Choques Macroeconómicos
 Versión Universitaria y de Investigación - CORREGIDA
 """
 
@@ -807,4 +807,411 @@ def main():
         st.header("🎬 Visualización de Choques Macroeconómicos")
         
         st.markdown("""
-        **Explore cómo los cho
+        **Explore cómo los choques afectan el equilibrio macroeconómico**
+        Utilice los controles interactivos para visualizar diferentes escenarios.
+        """)
+        
+        col1, col2 = st.columns([1, 2])
+        
+        with col1:
+            st.subheader("Configuración")
+            
+            shock_type = st.selectbox(
+                "Tipo de Choque", 
+                ["Sin Choque", "Gasto Gobierno ↑", "Gasto Gobierno ↓", 
+                 "Oferta Monetaria ↑", "Oferta Monetaria ↓"],
+                key="vis_shock"
+            )
+            magnitude = st.slider("Magnitud del Choque", 0.05, 0.30, 0.10, 0.05, key="vis_mag")
+            
+            if st.button("🔄 Actualizar Gráfico", type="primary", key="vis_update"):
+                st.session_state['vis_update'] = True
+            
+            with st.expander("📝 Mecanismo de Transmisión"):
+                if shock_type != "Sin Choque":
+                    st.markdown(f"""
+                    **Choque seleccionado:** {shock_type}
+                    
+                    **Efectos esperados:**
+                    - {'Aumento' if '↑' in shock_type else 'Disminución'} del gasto agregado
+                    - Desplazamiento de la curva {'IS' if 'Gasto' in shock_type else 'LM'}
+                    - Cambio en el nivel de producción (Y)
+                    - Ajuste en la tasa de interés (r)
+                    - Nuevo equilibrio macroeconómico
+                    """)
+                else:
+                    st.info("Seleccione un choque para ver el mecanismo de transmisión")
+        
+        with col2:
+            model = ISLMModel()
+            model.solve()
+            
+            shock_display = None if shock_type == "Sin Choque" else shock_type
+            fig = Visualizer.plot_is_lm_static(model, shock_display, magnitude)
+            st.plotly_chart(fig, use_container_width=True, key="vis_plot")
+            
+            if shock_display:
+                temp_model = ISLMModel(model.params.copy())
+                temp_model.apply_shock(shock_display, magnitude)
+                new_eq = temp_model.solve()
+                
+                col_a, col_b, col_c = st.columns(3)
+                col_a.metric("Producción (Y)", f"{new_eq['Y']:.2f}", 
+                            delta=f"{new_eq['Y'] - model.equilibrium['Y']:+.2f}")
+                col_b.metric("Tasa Interés (r)", f"{new_eq['r']:.2%}",
+                            delta=f"{(new_eq['r'] - model.equilibrium['r'])*100:+.2f} p.p.")
+                col_c.metric("Inversión (I)", f"{new_eq['I']:.2f}",
+                            delta=f"{new_eq['I'] - model.equilibrium['I']:+.2f}")
+        
+        # Análisis de sensibilidad
+        st.subheader("📊 Análisis de Sensibilidad")
+        
+        if st.button("📈 Ejecutar Análisis de Sensibilidad", key="sens_exec"):
+            magnitudes = np.linspace(0.05, 0.30, 6)
+            results = {'Y': [], 'r': []}
+            
+            model_base = ISLMModel()
+            model_base.solve()
+            
+            for mag in magnitudes:
+                temp_model = ISLMModel(model_base.params.copy())
+                temp_model.apply_shock("Gasto Gobierno ↑", mag)
+                eq = temp_model.solve()
+                results['Y'].append(eq['Y'])
+                results['r'].append(eq['r'])
+            
+            fig_sens = Visualizer.plot_sensitivity_analysis(magnitudes, results)
+            st.plotly_chart(fig_sens, use_container_width=True, key="sens_plot")
+            
+            df_results = pd.DataFrame({
+                'Magnitud': magnitudes,
+                'Producción (Y)': results['Y'],
+                'Tasa Interés (r)': results['r']
+            })
+            st.dataframe(df_results, use_container_width=True)
+    
+    # ========================================================================
+    # PÁGINA: SERIES TEMPORALES
+    # ========================================================================
+    
+    elif selection == "📊 Series Temporales":
+        st.header("📈 Análisis de Series Temporales Macroeconómicas")
+        
+        if st.button("🔄 Cargar Datos de Ejemplo", key="load_ts"):
+            data = DataManager.generate_sample_data()
+            st.session_state['time_series_data'] = data
+            st.rerun()
+        
+        if 'time_series_data' in st.session_state:
+            data = st.session_state['time_series_data']
+            
+            variables = st.multiselect(
+                "Seleccionar variables",
+                ['PIB', 'Inflacion', 'Tasa_Interes', 'Desempleo', 'Tipo_Cambio'],
+                default=['PIB', 'Inflacion'],
+                key="ts_vars"
+            )
+            
+            if variables:
+                fig = go.Figure()
+                for var in variables:
+                    fig.add_trace(go.Scatter(
+                        x=data['fecha'], 
+                        y=data[var],
+                        mode='lines',
+                        name=var,
+                        line=dict(width=2)
+                    ))
+                
+                fig.update_layout(
+                    title="Series Temporales Macroeconómicas",
+                    xaxis_title="Fecha",
+                    yaxis_title="Valor",
+                    template="plotly_white",
+                    height=500,
+                    hovermode='x unified'
+                )
+                
+                st.plotly_chart(fig, use_container_width=True, key="ts_plot")
+                
+                with st.expander("📊 Estadísticas Descriptivas"):
+                    st.dataframe(data[variables].describe(), use_container_width=True)
+                
+                if st.button("📊 Mostrar Dashboard Completo", key="ts_dash"):
+                    fig_dash = Visualizer.plot_macro_dashboard(data)
+                    st.plotly_chart(fig_dash, use_container_width=True, key="ts_dash_plot")
+        else:
+            st.info("Haga clic en 'Cargar Datos de Ejemplo' para comenzar")
+    
+    # ========================================================================
+    # PÁGINA: IMPORTAR DATOS
+    # ========================================================================
+    
+    elif selection == "📂 Importar Datos":
+        st.header("📂 Importación de Datos Económicos")
+        
+        st.markdown("""
+        **Formatos soportados:** CSV, Excel (xlsx, xls)
+        
+        **Columnas esperadas:** fecha, PIB, Inflacion, Tasa_Interes, Desempleo, Tipo_Cambio
+        """)
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            uploaded_file = st.file_uploader(
+                "Subir archivo de datos",
+                type=['csv', 'xlsx', 'xls'],
+                help="Sube un archivo CSV o Excel con datos macroeconómicos"
+            )
+            
+            if uploaded_file is not None:
+                try:
+                    if uploaded_file.name.endswith('.csv'):
+                        df = pd.read_csv(uploaded_file)
+                    else:
+                        df = pd.read_excel(uploaded_file)
+                    
+                    st.session_state['imported_data'] = df
+                    st.success(f"✅ Datos cargados: {len(df)} registros")
+                    st.dataframe(df.head(), use_container_width=True)
+                except Exception as e:
+                    st.error(f"Error al cargar datos: {e}")
+        
+        with col2:
+            st.subheader("Datos de Ejemplo")
+            if st.button("📊 Generar Datos de Ejemplo", key="gen_data"):
+                sample_data = DataManager.generate_sample_data()
+                st.session_state['imported_data'] = sample_data
+                st.success("✅ Datos de ejemplo generados")
+                st.dataframe(sample_data.head(), use_container_width=True)
+        
+        if 'imported_data' in st.session_state:
+            st.subheader("📊 Visualización de Datos Importados")
+            df = st.session_state['imported_data']
+            
+            fig = go.Figure()
+            if 'PIB' in df.columns:
+                fig.add_trace(go.Scatter(x=df['fecha'], y=df['PIB'], 
+                                        mode='lines', name='PIB'))
+            if 'Inflacion' in df.columns:
+                fig.add_trace(go.Scatter(x=df['fecha'], y=df['Inflacion'], 
+                                        mode='lines', name='Inflación', yaxis='y2'))
+            
+            fig.update_layout(
+                title="Datos Importados",
+                template="plotly_white",
+                height=400,
+                yaxis=dict(title="PIB"),
+                yaxis2=dict(title="Inflación", overlaying='y', side='right')
+            )
+            st.plotly_chart(fig, use_container_width=True, key="import_plot")
+    
+    # ========================================================================
+    # PÁGINA: SIMULACIÓN DE POLÍTICAS
+    # ========================================================================
+    
+    elif selection == "🧮 Simulación Políticas":
+        st.header("🧮 Simulación de Políticas Económicas")
+        
+        st.markdown("**Simule diferentes políticas económicas y compare sus efectos**")
+        
+        col1, col2 = st.columns([1, 1])
+        
+        with col1:
+            st.subheader("Modelo Base")
+            model_type = st.selectbox("Modelo", ["IS-LM", "AD-AS"], key="sim_model")
+            
+            if model_type == "IS-LM":
+                G_base = st.slider("Gasto gobierno (G)", 50, 200, 100, key="sim_g")
+                M_base = st.slider("Oferta monetaria (M)", 100, 400, 200, key="sim_m")
+                model = ISLMModel({'G': G_base, 'M': M_base})
+            else:
+                M_base = st.slider("Oferta monetaria (M)", 100, 400, 200, key="sim_m2")
+                Yn_base = st.slider("Producción natural (Y_n)", 80, 150, 100, key="sim_yn")
+                model = ADASModel({'M': M_base, 'Y_n': Yn_base})
+            
+            eq_base = model.solve()
+            st.metric("Equilibrio Base - Y", f"{eq_base['Y']:.2f}")
+        
+        with col2:
+            st.subheader("Políticas a Simular")
+            
+            policy_type = st.selectbox(
+                "Tipo de Política", 
+                ["Fiscal Expansiva", "Fiscal Contractiva", "Monetaria Expansiva", "Monetaria Contractiva"],
+                key="sim_policy"
+            )
+            magnitude_pol = st.slider("Magnitud", 0.05, 0.30, 0.10, 0.05, key="sim_mag")
+            
+            if st.button("▶️ Ejecutar Simulación", type="primary", key="sim_exec"):
+                if policy_type == "Fiscal Expansiva":
+                    shock = "Gasto Gobierno ↑"
+                elif policy_type == "Fiscal Contractiva":
+                    shock = "Gasto Gobierno ↓"
+                elif policy_type == "Monetaria Expansiva":
+                    shock = "Oferta Monetaria ↑"
+                else:
+                    shock = "Oferta Monetaria ↓"
+                
+                if model_type == "IS-LM":
+                    model_after = ISLMModel(model.params.copy())
+                else:
+                    model_after = ADASModel(model.params.copy())
+                
+                eq_after = model_after.apply_shock(shock, magnitude_pol)
+                
+                st.subheader("📊 Resultados de la Simulación")
+                
+                col_a, col_b, col_c = st.columns(3)
+                col_a.metric("Variable", "Producción (Y)")
+                col_b.metric("Valor Base", f"{eq_base['Y']:.2f}")
+                col_c.metric("Valor Simulado", f"{eq_after['Y']:.2f}", 
+                            delta=f"{eq_after['Y'] - eq_base['Y']:+.2f}")
+                
+                comparison = pd.DataFrame({
+                    'Variable': ['Y', 'r' if 'r' in eq_after else 'P'],
+                    'Base': [eq_base.get('Y', 0), eq_base.get('r', eq_base.get('P', 0))],
+                    'Simulado': [eq_after.get('Y', 0), eq_after.get('r', eq_after.get('P', 0))],
+                    'Cambio (%)': [
+                        (eq_after.get('Y', 0) - eq_base.get('Y', 0)) / eq_base.get('Y', 1) * 100,
+                        (eq_after.get('r', eq_after.get('P', 0)) - 
+                         eq_base.get('r', eq_base.get('P', 0))) / max(eq_base.get('r', eq_base.get('P', 0.1)), 0.01) * 100
+                    ]
+                })
+                st.dataframe(comparison, use_container_width=True)
+    
+    # ========================================================================
+    # PÁGINA: REPORTES PDF
+    # ========================================================================
+    
+    elif selection == "📝 Reportes PDF":
+        st.header("📝 Generación Automática de Reportes")
+        
+        st.markdown("**Genere reportes profesionales en PDF con análisis completos**")
+        
+        col1, col2 = st.columns([1, 1])
+        
+        with col1:
+            st.subheader("Configuración del Reporte")
+            report_title = st.text_input("Título del Reporte", "Análisis Macroeconómico")
+            
+            if st.button("📄 Generar Reporte", type="primary", key="gen_report"):
+                # Generar contenido simple para el reporte
+                content = [
+                    {
+                        'title': 'Resumen Ejecutivo',
+                        'text': f'''
+                        El presente análisis macroeconómico fue realizado con el SICM v2.0.
+                        Fecha de generación: {datetime.now().strftime('%Y-%m-%d %H:%M')}
+                        '''
+                    },
+                    {
+                        'title': 'Análisis de Modelos',
+                        'text': 'Se evaluaron los modelos IS-LM y AD-AS para el análisis de políticas.'
+                    },
+                    {
+                        'title': 'Conclusiones',
+                        'text': '''
+                        • Los modelos IS-LM y AD-AS proporcionan un marco completo
+                        • Los choques fiscales tienen efectos multiplicadores
+                        • Las políticas monetarias afectan principalmente precios
+                        '''
+                    }
+                ]
+                
+                st.success("✅ Reporte generado exitosamente")
+                st.info("📥 En producción, aquí se descargaría el PDF")
+                st.markdown(f"""
+                **Contenido del Reporte:**
+                - Título: {report_title}
+                - Fecha: {datetime.now().strftime('%Y-%m-%d')}
+                - Secciones: Resumen, Análisis, Conclusiones
+                """)
+    
+    # ========================================================================
+    # PÁGINA: GUARDAR ESCENARIOS
+    # ========================================================================
+    
+    elif selection == "💾 Guardar Escenarios":
+        st.header("💾 Gestión de Escenarios")
+        
+        st.markdown("**Guarde, cargue y compare diferentes escenarios económicos**")
+        
+        col1, col2 = st.columns([1, 1])
+        
+        with col1:
+            st.subheader("Guardar Escenario Actual")
+            scenario_name = st.text_input("Nombre del Escenario", "Escenario_1")
+            scenario_desc = st.text_area("Descripción")
+            
+            if st.button("💾 Guardar Escenario", type="primary", key="save_scenario"):
+                scenario = {
+                    'name': scenario_name,
+                    'description': scenario_desc,
+                    'data': {'Y': 100, 'r': 0.05, 'P': 1.0},
+                    'timestamp': datetime.now().isoformat()
+                }
+                st.session_state['saved_scenarios'].append(scenario)
+                st.success(f"✅ Escenario '{scenario_name}' guardado")
+        
+        with col2:
+            st.subheader("Escenarios Guardados")
+            if st.session_state['saved_scenarios']:
+                for i, s in enumerate(st.session_state['saved_scenarios']):
+                    st.markdown(f"**{s['name']}**")
+                    st.caption(f"{s['description']}")
+                    st.caption(f"📅 {s['timestamp'][:10]}")
+                    st.markdown("---")
+            else:
+                st.info("No hay escenarios guardados")
+    
+    # ========================================================================
+    # PÁGINA: DASHBOARD
+    # ========================================================================
+    
+    elif selection == "🏛️ Dashboard":
+        st.header("🏛️ Dashboard - Laboratorio de Economía")
+        
+        st.markdown("**Panel de control integral para análisis macroeconómico**")
+        
+        # Métricas principales
+        col1, col2, col3, col4 = st.columns(4)
+        col1.metric("PIB", "120.5", "+2.3%", delta_color="normal")
+        col2.metric("Inflación", "2.8%", "+0.3%", delta_color="inverse")
+        col3.metric("Desempleo", "5.2%", "-0.1%", delta_color="normal")
+        col4.metric("Tasa Interés", "4.5%", "+0.25%", delta_color="inverse")
+        
+        if 'time_series_data' in st.session_state:
+            data = st.session_state['time_series_data']
+            fig = Visualizer.plot_macro_dashboard(data)
+            st.plotly_chart(fig, use_container_width=True, key="dash_plot")
+        else:
+            if st.button("📊 Cargar Datos de Ejemplo para Dashboard", key="dash_load"):
+                data = DataManager.generate_sample_data()
+                st.session_state['time_series_data'] = data
+                st.rerun()
+            else:
+                st.info("Cargue datos para ver el dashboard completo")
+        
+        # Indicadores de política
+        st.subheader("📊 Indicadores de Política")
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("**Brecha del Producto**")
+            st.progress(0.65, text="65% de capacidad utilizada")
+            st.caption("Brecha negativa: -2.5% del PIB potencial")
+        
+        with col2:
+            st.markdown("**Regla de Taylor**")
+            st.progress(0.45, text="Tasa recomendada: 4.2%")
+            st.caption("Tasa actual: 4.5% - Política ligeramente restrictiva")
+
+
+# ============================================================================
+# EJECUCIÓN PRINCIPAL
+# ============================================================================
+
+if __name__ == "__main__":
+    main()
