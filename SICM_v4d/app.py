@@ -592,6 +592,60 @@ class Visualizer:
         
         return fig
 
+    @staticmethod
+    def plot_ad_as_static(model):
+        """Versión estática de AD-AS (evita errores DOM)"""
+        P_range = np.linspace(0.3, 2.0, 100)
+        Y_ad, P_ad = model.get_ad_curve(P_range)
+        Y_sras, P_sras = model.get_sras_curve(np.linspace(50, 150, 100))
+        
+        fig = go.Figure()
+        
+        # AD
+        fig.add_trace(go.Scatter(
+            x=Y_ad, y=P_ad,
+            mode='lines',
+            name='AD',
+            line=dict(color='blue', width=3)
+        ))
+        
+        # SRAS
+        fig.add_trace(go.Scatter(
+            x=Y_sras, y=P_sras,
+            mode='lines',
+            name='SRAS',
+            line=dict(color='red', width=3)
+        ))
+        
+        # LRAS
+        fig.add_vline(
+            x=model.params['Y_n'],
+            line_dash="dash",
+            line_color="green",
+            annotation_text="LRAS",
+            annotation_position="top"
+        )
+        
+        # Equilibrio
+        eq = model.solve()
+        fig.add_trace(go.Scatter(
+            x=[eq['Y']],
+            y=[eq['P']],
+            mode='markers',
+            name=f'Equilibrio: Y={eq["Y"]:.1f}, P={eq["P"]:.2f}',
+            marker=dict(size=15, color='gold', symbol='star', line=dict(width=2, color='darkgoldenrod'))
+        ))
+        
+        fig.update_layout(
+            title="Modelo AD-AS - Equilibrio Macroeconómico",
+            xaxis_title="Producción (Y)",
+            yaxis_title="Nivel de Precios (P)",
+            template="plotly_white",
+            height=500,
+            hovermode='closest'
+        )
+        
+        return fig        
 # ============================================================================
 # MÓDULO 4: SIMULACIÓN DE POLÍTICAS Y ESCENARIOS
 # ============================================================================
