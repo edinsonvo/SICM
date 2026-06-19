@@ -34,7 +34,7 @@ pio.renderers.default = 'browser'
 # ============================================================================
 
 st.set_page_config(
-    page_title="SICM v2.0 - Laboratorio Macroeconómico",
+    page_title="SICM v4.0 - Laboratorio Macroeconómico",
     page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -582,10 +582,10 @@ class Visualizer:
 # ============================================================================
 
 def main():
-    """Aplicación principal SICM v2.0"""
+    """Aplicación principal SICM v4.0"""
     
     # Cabecera
-    st.markdown('<div class="main-header">📊 SICM v2.0</div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header">📊 SICM v4.0</div>', unsafe_allow_html=True)
     st.markdown('<div class="sub-header">Simulador Integral de Choques Macroeconómicos<br>Versión Universitaria y de Investigación</div>', unsafe_allow_html=True)
     
     # Sidebar - Navegación
@@ -605,7 +605,7 @@ def main():
         ]
         selection = st.radio("Navegación", nav_options)
         st.markdown("---")
-        st.info("📚 SICM v2.0 - Laboratorio Macroeconómico")
+        st.info("📚 SICM v4.0 - Laboratorio Macroeconómico")
     
     # ========================================================================
     # PÁGINA: INICIO
@@ -1102,7 +1102,7 @@ def main():
                     {
                         'title': 'Resumen Ejecutivo',
                         'text': f'''
-                        El presente análisis macroeconómico fue realizado con el SICM v2.0.
+                        El presente análisis macroeconómico fue realizado con el SICM v4.0.
                         Fecha de generación: {datetime.now().strftime('%Y-%m-%d %H:%M')}
                         '''
                     },
