@@ -7,7 +7,7 @@ def render_footer():
 
     st.caption(
         """
-        SICM v5.1 Research Lab
+        *SICM v5.1 Research Lab*
 
         Desarrollado por Edinson Patrocinio Valencia Omaña
         
