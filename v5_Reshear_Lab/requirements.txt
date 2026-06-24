@@ -1,6 +1,22 @@
+# SICM v5 Research Lab — Dependencias
+# ===================================
+# Ejecutar: pip install -r requirements.txt
+
+# Framework de aplicación
 streamlit>=1.28.0
+
+# Visualización
 plotly>=5.15.0
+
+# Computación numérica
 numpy>=1.24.0
-pandas>=2.0.0
 scipy>=1.11.0
+
+# Manipulación de datos
+pandas>=2.0.0
+
+# Importación de datos
 openpyxl>=3.1.0
+
+# Opcional: para econometría avanzada
+statsmodels>=0.14.0
