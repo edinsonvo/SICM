@@ -18,5 +18,7 @@ pandas>=2.0.0
 # Importación de datos
 openpyxl>=3.1.0
 
+xlrd>=2.0.0
+
 # Opcional: para econometría avanzada
 statsmodels>=0.14.0
