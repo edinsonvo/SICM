@@ -7,7 +7,7 @@ streamlit>=1.28.0
 
 # Visualización
 plotly>=5.15.0
-
+plotly
 # Computación numérica
 numpy>=1.24.0
 scipy>=1.11.0
