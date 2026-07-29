@@ -1,0 +1,10 @@
+streamlit==1.28.0
+plotly==5.17.0
+numpy==1.24.3
+scipy==1.10.1
+pandas==2.0.3
+statsmodels==0.14.0
+pmdarima==2.0.4
+arch==6.0.0
+yfinance==0.2.28
+matplotlib==3.7.2
