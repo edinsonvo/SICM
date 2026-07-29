@@ -1,36 +1,34 @@
+from typing import Dict, Type
+
+from models.base_model import BaseModel
+
+
 class Registry:
 
-    _models = {}
+    _models: Dict[str, Type[BaseModel]] = {}
 
     @classmethod
-    def register(
+    def register(cls, name: str):
+        def decorator(model_cls):
 
-        cls,
+            cls._models[name] = model_cls
 
-        name,
+            return model_cls
 
-        model
+        return decorator
 
-    ):
+    @classmethod
+    def create(cls, name, config):
 
-        cls._models[name] = model
-
-    def create(
-
-        self,
-
-        name,
-
-        config
-
-    ):
-
-        if name not in self._models:
+        if name not in cls._models:
 
             raise ValueError(
-
-                f"Modelo {name} no registrado."
-
+                f"Modelo '{name}' no registrado."
             )
 
-        return self._models[name](config)
+        return cls._models[name](config)
+
+    @classmethod
+    def available_models(cls):
+
+        return sorted(cls._models.keys())
