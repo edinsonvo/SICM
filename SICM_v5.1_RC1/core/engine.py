@@ -3,26 +3,22 @@ from core.registry import Registry
 
 class Engine:
 
-    def __init__(self):
-
-        self.registry = Registry()
-
     def run(
 
         self,
 
-        model_name,
+        model,
 
         config
 
     ):
 
-        model = self.registry.create(
+        instance = Registry.create(
 
-            model_name,
+            model,
 
             config
 
         )
 
-        return model.solve()
+        return instance.solve()
