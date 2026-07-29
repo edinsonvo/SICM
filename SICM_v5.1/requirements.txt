@@ -1,9 +1,10 @@
 streamlit
+plotly
 numpy
 pandas
-plotly
-matplotlib
 scipy
+statsmodels
+matplotlib
 openpyxl
 reportlab
 python-pptx
