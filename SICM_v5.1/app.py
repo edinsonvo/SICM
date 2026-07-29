@@ -65,22 +65,22 @@ render_footer()
 
 from visualization.plot_factory import PlotFactory
 
-...
-
-with tabs[1]:
-
-    figure = PlotFactory.create(
-
-        model,
-
-        result,
-
-        config
-    )
-
-    st.plotly_chart(
-
-        figure,
-
-        use_container_width=True
-    )
+    ...
+    
+    with tabs[1]:
+    
+        figure = PlotFactory.create(
+    
+            model,
+    
+            result,
+    
+            config
+        )
+    
+        st.plotly_chart(
+    
+            figure,
+    
+            use_container_width=True
+        )
