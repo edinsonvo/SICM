@@ -1,31 +1,33 @@
 from abc import ABC
-
 from abc import abstractmethod
+
+from core.equilibrium import EquilibriumResult
 
 
 class BaseModel(ABC):
 
-    def __init__(
+    name = ""
 
-        self,
+    description = ""
 
-        config
-
-    ):
+    def __init__(self, config):
 
         self.config = config
 
     @abstractmethod
-    def solve(self):
+    def solve(self) -> EquilibriumResult:
+        ...
+
+    @abstractmethod
+    def interpret(self, result):
 
         ...
 
     @abstractmethod
-    def interpret(self):
+    def default_plot(self):
 
         ...
 
-    @abstractmethod
-    def metrics(self):
+    def metrics(self, result):
 
-        ...
+        return result.__dict__
