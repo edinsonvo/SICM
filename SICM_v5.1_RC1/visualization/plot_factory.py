@@ -9,3 +9,6 @@ PLOTS = {
     "production":ProductionPlot
 
 }
+plot = PLOTS[
+    model.default_plot()
+]
