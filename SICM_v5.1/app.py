@@ -1,18 +1,23 @@
 import streamlit as st
 
-from core.parameters import (
-    EconomyConfig
+from ui.sidebar import render_sidebar
+
+from ui.tabs import create_tabs
+
+from ui.layout import (
+    render_metrics,
+    render_summary
 )
 
-from core.api import (
-    SICMEngine
-)
+from core.api import SICMEngine
 
 from core.footer import (
     render_footer
 )
 
+
 st.set_page_config(
+    page_title="SICM v5.1 Research Lab",
     layout="wide"
 )
 
@@ -20,33 +25,40 @@ st.title(
     "SICM v5.1 Research Lab"
 )
 
-model = st.selectbox(
-
-    "Modelo",
-
-    [
-        "islm",
-        "mundell_fleming",
-        "classical_closed",
-        "classical_open"
-    ]
-)
-
-config = EconomyConfig()
+(
+    model,
+    shock_type,
+    shock_size,
+    config
+) = render_sidebar()
 
 engine = SICMEngine()
 
-if st.button(
-    "Simular"
-):
+tabs = create_tabs()
 
-    result = (
-        engine.run(
-            model,
-            config
-        )
+if st.button("Simular"):
+
+    result = engine.run(
+        model,
+        config
     )
 
-    st.write(result)
+    with tabs[0]:
+
+        render_metrics(result)
+
+        render_summary(result)
+
+    with tabs[1]:
+
+        st.info(
+            "Gráfica disponible en Entrega 2.2"
+        )
+
+    with tabs[2]:
+
+        st.info(
+            "Comparador disponible en Sprint 3"
+        )
 
 render_footer()
