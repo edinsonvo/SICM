@@ -1,24 +1,17 @@
 from enum import Enum
 
-
-class ShockType(Enum):
-    """Tipos de choques macroeconómicos"""
-    SUPPLY = "supply"
-    DEMAND = "demand"
-    MONETARY = "monetary"
-    FISCAL = "fiscal"
-
-
-class ModelType(Enum):
-    """Tipos de modelos macroeconómicos"""
-    IS_LM = "is_lm"
-    AD_AS = "ad_as"
+class ModelType(str, Enum):
+    ISLM = "islm"
+    CLASSICAL = "classical"
     MUNDELL_FLEMING = "mundell_fleming"
-    SOLOW = "solow"
-    DSGE = "dsge"
+    KEYNESIAN = "keynesian"
 
+class ShockType(str, Enum):
+    FISCAL = "fiscal"
+    MONETARY = "monetary"
+    SUPPLY = "supply"
+    EXTERNAL = "external"
 
-class EconomyType(Enum):
-    """Tipos de economía"""
+class EconomyType(str, Enum):
     CLOSED = "closed"
     OPEN = "open"
