@@ -1,20 +1,18 @@
+from __future__ import annotations
+
+from typing import Type, Any
 from sicm_core.exceptions import ModelNotFoundError
 
 class Registry:
-    def __init__(self):
-        self._models = {}
 
-    def register(self, model):
-        name = getattr(model, "name", None)
-        if not name:
-            raise ValueError("Registered model must define 'name'.")
-        self._models[name] = model
+    def __init__(self) -> None:
+        self._models: dict[str, Type[Any]] = {}
 
-    def get(self, name):
+    def register(self, model: Type[Any]) -> None:
+        self._models[model.name] = model
+
+    def get(self, name: str) -> Type[Any]:
         try:
             return self._models[name]
-        except KeyError as exc:
-            raise ModelNotFoundError(f"Unknown model: {name}") from exc
-
-    def names(self):
-        return tuple(sorted(self._models))
+        except KeyError:
+            raise ModelNotFoundError(name)
