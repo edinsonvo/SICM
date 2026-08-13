@@ -1,23 +1,20 @@
-from typing import Any, Tuple
-
-
 class Pipeline:
 
     def __init__(
 
         self,
 
-        validator: Any,
+        validator,
 
-        dispatcher: Any
+        dispatcher
 
-    ) -> None:
+    ):
 
         self.validator = validator
 
         self.dispatcher = dispatcher
 
-    def execute(self, context: Any) -> Tuple[Any, Any]:
+    def execute(self, context):
 
         self.validator.validate(
 

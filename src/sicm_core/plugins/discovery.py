@@ -1,8 +1,5 @@
 """Plugin discovery helpers."""
 from __future__ import annotations
-from typing import Any
 from .loader import PluginLoader
-
-
-def discover_models(namespace: str = "sicm.models") -> dict[str, Any]:
+def discover_models(namespace: str = "sicm.models"):
     return PluginLoader().load(namespace)

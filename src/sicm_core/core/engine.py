@@ -1,4 +1,3 @@
-from typing import Any, Tuple
 from sicm_core.core.context import ExecutionContext
 
 
@@ -8,13 +7,13 @@ class Engine:
 
         self,
 
-        pipeline: Any
+        pipeline
 
-    ) -> None:
+    ):
 
         self.pipeline = pipeline
 
-    def run(self, experiment: Any) -> Tuple[Any, Any]:
+    def run(self, experiment):
 
         context = ExecutionContext(
 

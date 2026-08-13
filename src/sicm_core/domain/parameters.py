@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, asdict
-from typing import Any
 
 
 @dataclass(frozen=True, slots=True)
@@ -28,5 +27,5 @@ class EconomyParameters:
     K: float = 100.0
     alpha: float = 0.33
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> dict:
         return asdict(self)
