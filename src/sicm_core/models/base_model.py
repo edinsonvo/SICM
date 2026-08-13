@@ -1,12 +1,9 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from sicm_core.domain.execution_result import ExecutionResult
 from sicm_core.domain.experiment import Experiment
+from .model_contract import ModelContract
 
-class BaseModel(ABC):
-    name = ""
-    family = ""
-    version = "1.0"
-
+class BaseModel(ModelContract):
     @abstractmethod
     def solve(self, experiment: Experiment) -> ExecutionResult: ...
 
