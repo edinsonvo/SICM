@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from typing import Type, Any
-
 from sicm_core.exceptions import ModelNotFoundError
 
 

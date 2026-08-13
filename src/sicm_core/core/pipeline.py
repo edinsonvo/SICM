@@ -4,9 +4,13 @@ from typing import Any, Tuple
 class Pipeline:
 
     def __init__(
+
         self,
+
         validator: Any,
+
         dispatcher: Any
+
     ) -> None:
 
         self.validator = validator
@@ -16,16 +20,19 @@ class Pipeline:
     def execute(self, context: Any) -> Tuple[Any, Any]:
 
         self.validator.validate(
+
             context.experiment
         )
 
         model_cls = self.dispatcher.dispatch(
+
             context.experiment.scenario.model.value
         )
 
         model = model_cls()
 
         result = model.solve(
+
             context.experiment
         )
 
