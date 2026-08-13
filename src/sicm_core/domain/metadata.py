@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field, asdict
 from datetime import datetime, UTC
+from typing import Any
 
 
 @dataclass(frozen=True, slots=True)
@@ -12,5 +13,5 @@ class Metadata:
     description: str = ""
     tags: tuple[str, ...] = ()
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         return asdict(self)

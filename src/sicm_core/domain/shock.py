@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, asdict
+from typing import Any
 
 from sicm_core.config.enums import ShockType
 
@@ -16,6 +17,5 @@ class Shock:
 
     description: str = ""
 
-    def to_dict(self):
-
+    def to_dict(self) -> dict[str, Any]:
         return asdict(self)
