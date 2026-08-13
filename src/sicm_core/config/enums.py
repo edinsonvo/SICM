@@ -7,3 +7,18 @@ class ShockType(Enum):
     DEMAND = "demand"
     MONETARY = "monetary"
     FISCAL = "fiscal"
+
+
+class ModelType(Enum):
+    """Tipos de modelos macroeconómicos"""
+    IS_LM = "is_lm"
+    AD_AS = "ad_as"
+    MUNDELL_FLEMING = "mundell_fleming"
+    SOLOW = "solow"
+    DSGE = "dsge"
+
+
+class EconomyType(Enum):
+    """Tipos de economía"""
+    CLOSED = "closed"
+    OPEN = "open"
