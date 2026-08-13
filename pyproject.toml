@@ -15,7 +15,7 @@ requires-python = ">=3.11"
 license = {text = "MIT"}
 
 authors = [
-  {name="Patrocinio Valencia",
+  {name="Edinson Patrocinio Valencia",
    email="edvalenciao@unal.edu.co"}
 ]
 
