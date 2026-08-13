@@ -1,0 +1,7 @@
+site_name: SICM Core
+theme:
+  name: material
+nav:
+  - Inicio: index.md
+  - Arquitectura: architecture.md
+  - API: api.md
