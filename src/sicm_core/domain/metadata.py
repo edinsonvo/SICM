@@ -8,7 +8,7 @@ from typing import Any
 @dataclass(frozen=True, slots=True)
 class Metadata:
     author: str
-    institution: str
+    institution: str = ""
     created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     description: str = ""
     tags: tuple[str, ...] = ()

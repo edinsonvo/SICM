@@ -1,4 +1,3 @@
-"""Project paths."""
 from pathlib import Path
 
 def ensure_log_directory(log_file: str) -> Path:

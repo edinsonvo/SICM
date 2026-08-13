@@ -1,6 +1,9 @@
-"""Configuration manager module."""
-
+from .settings import Settings
 
 class ConfigManager:
-    """Configuration manager."""
-    pass
+    def __init__(self, settings=None):
+        self._settings = settings or Settings.from_env()
+
+    @property
+    def settings(self):
+        return self._settings

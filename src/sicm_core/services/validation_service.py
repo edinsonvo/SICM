@@ -1,8 +1,6 @@
-"""Validation application service."""
-from sicm_core.domain.experiment import Experiment
-from sicm_core.validation.validator import Validator
 class ValidationService:
-    def __init__(self, validator: Validator) -> None:
+    def __init__(self, validator):
         self.validator = validator
-    def validate(self, experiment: Experiment) -> None:
+
+    def validate(self, experiment):
         self.validator.validate(experiment)
