@@ -1,11 +1,10 @@
 from abc import abstractmethod
-from sicm_core.domain.execution_result import ExecutionResult
-from sicm_core.domain.experiment import Experiment
 from .model_contract import ModelContract
+from .result import ModelResult
 
 class BaseModel(ModelContract):
     @abstractmethod
-    def solve(self, experiment: Experiment) -> ExecutionResult: ...
+    def solve(self, scenario) -> ModelResult: ...
 
     @abstractmethod
-    def interpret(self, result: ExecutionResult) -> str: ...
+    def interpret(self, result: ModelResult) -> str: ...

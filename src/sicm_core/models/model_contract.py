@@ -1,7 +1,11 @@
 from abc import ABC, abstractmethod
 from typing import Mapping
+from .curve import Curve
 from .equation import Equation
 from .parameter import Parameter
+from .result import ModelResult
+from .shock import ModelShock
+from .transmission import TransmissionMechanism
 from .variable import Variable
 
 class ModelContract(ABC):
@@ -18,6 +22,9 @@ class ModelContract(ABC):
     @abstractmethod
     def equations(self) -> tuple[Equation, ...]: ...
 
+    @abstractmethod
+    def solve(self, scenario) -> ModelResult: ...
+
     def variable_map(self) -> Mapping[str, Variable]:
         return {v.symbol: v for v in self.variables()}
 
@@ -26,6 +33,15 @@ class ModelContract(ABC):
 
     def equation_map(self) -> Mapping[str, Equation]:
         return {e.equation_id: e for e in self.equations()}
+
+    def curves(self, equilibrium) -> tuple[Curve, ...]:
+        return ()
+
+    def apply_shock(self, equilibrium, shock: ModelShock):
+        raise NotImplementedError("Concrete models must implement shock application.")
+
+    def transmission(self, shock, initial_equilibrium, final_equilibrium) -> TransmissionMechanism:
+        raise NotImplementedError("Concrete models must implement transmission.")
 
     def validate_contract(self) -> None:
         if not self.name.strip() or not self.family.strip():
