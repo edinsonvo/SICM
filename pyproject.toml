@@ -14,10 +14,9 @@ requires-python = ">=3.11"
 
 license = {text = "MIT"}
 
-authors = [
-  {"name": "Edinson Patrocinio Valencia",
-   "email": "edvalenciao@unal.edu.co"}
-]
+[[project.authors]]
+name = "Edinson Patrocinio Valencia"
+email = "edvalenciao@unal.edu.co"
 
 dependencies = [
     "numpy>=2.0",
